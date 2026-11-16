@@ -238,9 +238,9 @@
                     <h3 style="margin-top:0; color:#34495e; font-size:1.1rem;">📄 Transkript (Orijinal Metin)</h3>
                     <p style="font-size:0.85rem; color:#666;">Videoyu yükledikten sonra aşağıdaki butona tıklayarak orijinal altyazıyı kopyalayıp buraya yapıştırabilirsin.</p>
                     
-                    <!-- Yeni Sekmede Açılan Transkript Butonu (İframe hatasını çözer) -->
+                    <!-- GÜNCELLENEN TRANSKRİPT BUTONU (TUBE TRANSCRIPT) -->
                     <div id="transcript-tool" class="hidden" style="margin-bottom: 15px; text-align: center; background: white; padding: 15px; border-radius: 8px; border: 1px dashed #3498db;">
-                        <a id="transcript-link" href="#" target="_blank" style="display:inline-block; padding:10px 20px; background:#3498db; color:white; text-decoration:none; border-radius:5px; font-weight:bold;">📄 Otomatik Transkripti Al (Yeni Sekmede Açılır)</a>
+                        <a id="transcript-link" href="#" target="_blank" style="display:inline-block; padding:10px 20px; background:#3498db; color:white; text-decoration:none; border-radius:5px; font-weight:bold;">📄 YouTube Transkript Oluştur – Ücretsiz YouTube Video Transkripsiyonu</a>
                     </div>
                     
                     <textarea id="original-text" style="height:250px; background:#fff;" placeholder="Karşılaştırmak için orijinal metni (altyazıyı) buraya yapıştır..."></textarea>
@@ -275,7 +275,7 @@
 </div>
 
 <script>
-    // --- VERİTABANI (V6 - Taptaze ve Sorunsuz Sürüm) ---
+    // --- VERİTABANI (V6 Sürümünü Korumak Adına V6 Kaldık) ---
     let myData = JSON.parse(localStorage.getItem('myEngDataV6'));
     if (!myData) {
         myData = { vocab: [], otonna: [], pyramid: [], dictations: [] };
@@ -450,7 +450,7 @@
         document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
     }
 
-    // --- YOUTUBE & DİKTE (FOSFORLU KALEM) ---
+    // --- YOUTUBE & DİKTE ---
     let ytPlayer;
     let currentVideoId = "";
 
@@ -469,14 +469,13 @@
             });
         }
         
-        // Güvenli Transkript Butonunu Aktifleştir (Yeni Sekme)
+        // GÜNCELLENEN TRANSKRİPT SİTESİ LİNKİ
         document.getElementById('transcript-tool').classList.remove('hidden');
-        document.getElementById('transcript-link').href = `https://youtubetranscript.com/?v=${currentVideoId}`;
+        document.getElementById('transcript-link').href = `https://tubetranscript.com/?v=${currentVideoId}`;
 
         document.getElementById('dictation-notebook').focus();
     }
 
-    // Klavye Kısayolları (Ctrl+Space ve Ctrl+Left)
     document.getElementById('dictation-notebook').addEventListener('keydown', function(e) {
         if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
         
@@ -494,13 +493,11 @@
         }
     });
 
-    // Fosforlu Kalem İşlevi
     function applyHighlight(color) {
         document.getElementById('dictation-notebook').focus();
         document.execCommand('backColor', false, color);
     }
 
-    // Zaman Damgası
     function insertTimestamp() {
         if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') { alert("Önce videoyu yükleyin!"); return; }
         let time = Math.floor(ytPlayer.getCurrentTime());
@@ -508,12 +505,10 @@
         let timeStr = `\n[${minutes}:${seconds < 10 ? '0'+seconds : seconds}] `;
         
         document.getElementById('dictation-notebook').focus();
-        // Div contenteditable içine imlecin olduğu yere ekle
         document.execCommand('insertText', false, timeStr);
     }
 
     function saveDictation() {
-        // Div olduğu için innerHTML alıyoruz (renkler kaybolmasın diye)
         let notes = document.getElementById('dictation-notebook').innerHTML.trim();
         let original = document.getElementById('original-text').value.trim();
         
@@ -532,12 +527,11 @@
         setTimeout(() => { document.getElementById('dict-feedback').innerText = ""; }, 3000);
     }
 
-    // Defter Placeholder (Boşken yazı görünsün diye)
     document.getElementById('dictation-notebook').addEventListener('focus', function() {
         if(this.innerHTML.trim() === this.getAttribute('data-placeholder')) this.innerHTML = '';
     });
 
-    // --- OYUN MOTORLARI ---
+    // --- OYUN MOTORLARI (SONSUZ DÖNGÜ EKLENDİ) ---
     let currentQIndex = 0, shuffledQuestions = [], currentPuzzleAnswer = "", currentHintIndex = 0;
 
     function startTestGame() {
@@ -552,7 +546,13 @@
         document.getElementById('test-feedback').innerText = "";
         const optionsArea = document.getElementById('test-options');
         optionsArea.innerHTML = "";
-        if (currentQIndex >= shuffledQuestions.length) { document.getElementById('test-question').innerHTML = "🎉 Tebrikler! Tüm testi bitirdin."; return; }
+        
+        // SONSUZ DÖNGÜ MANTIĞI EKLENDİ
+        if (currentQIndex >= shuffledQuestions.length) {
+            currentQIndex = 0;
+            shuffledQuestions = [...myData.vocab].sort(() => 0.5 - Math.random());
+        }
+        
         let q = shuffledQuestions[currentQIndex];
         document.getElementById('test-question').innerHTML = `<strong>Tanım:</strong> ${q.en}<br><span style="font-size:0.9rem; color:#555;">(🇹🇷 ${q.tr})</span>`;
         let wrongOptions = myData.vocab.filter(v => v.word !== q.word).sort(() => 0.5 - Math.random()).slice(0, 3);
@@ -588,10 +588,13 @@
         let inputField = document.getElementById('puzzle-input');
         inputField.value = ""; inputField.disabled = false; inputField.style.border = "1px solid #ccc";
         currentHintIndex = 0;
+        
+        // SONSUZ DÖNGÜ MANTIĞI EKLENDİ
         if (currentQIndex >= shuffledQuestions.length) {
-            document.getElementById('puzzle-question').innerHTML = "🎉 Tebrikler! Bulmacayı bitirdin.";
-            document.querySelector('.puzzle-input-area').style.display = 'none'; return;
+            currentQIndex = 0;
+            shuffledQuestions = [...myData.vocab].sort(() => 0.5 - Math.random());
         }
+        
         let q = shuffledQuestions[currentQIndex];
         currentPuzzleAnswer = q.word;
         document.getElementById('puzzle-question').innerHTML = `<strong>Tanım:</strong> ${q.en}<br><span style="font-size:0.9rem; color:#666;">(İpucu: 🇹🇷 ${q.tr} | ${q.word.length} karakter)</span>`;

@@ -16,7 +16,8 @@
         .btn-green { background: #2ecc71; } .btn-green:hover { background: #27ae60; }
         .btn-orange { background: #f39c12; } .btn-orange:hover { background: #d68910; }
         .btn-purple { background: #9b59b6; } .btn-purple:hover { background: #8e44ad; }
-        .btn-small { padding: 5px 10px; font-size: 13px; background: #95a5a6; } .btn-small:hover { background: #7f8c8d; }
+        .btn-small { padding: 5px 10px; font-size: 13px; background: #95a5a6; cursor: pointer; border: none; border-radius: 4px; color: white; font-weight: bold;} 
+        .btn-small:hover { opacity: 0.8; }
         
         /* Özet Kutuları */
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -39,6 +40,7 @@
         .dictation-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;}
         .video-container { width: 100%; background: #000; border-radius: 8px; overflow: hidden; }
         
+        /* Zengin Metin Defteri (div contenteditable) */
         .notebook-paper {
             background-color: #fdf5e6;
             background-image: linear-gradient(#e8a0a0 1px, transparent 1px), linear-gradient(#fdf5e6 29px, #74b9ff 30px);
@@ -53,11 +55,14 @@
             min-height: 250px;
             font-family: 'Comic Sans MS', cursive, sans-serif;
             font-size: 16px;
-            resize: vertical;
             outline: none;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            box-sizing: border-box;
         }
         
         .controls-info { font-size: 0.9rem; color: #7f8c8d; background: #eee; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; margin-bottom: 10px;}
+        .marker-toolbar { display:flex; gap:5px; margin-bottom: 5px; align-items:center; background:#fff; padding:5px; border-radius:5px; border:1px solid #ddd; }
         
         /* Oyun Alanları */
         .game-wrapper { text-align: center; }
@@ -112,7 +117,7 @@
         </div>
     </div>
 
-    <!-- BÖLÜM 2: VERİ EKLEME (TAM VE EKSİKSİZ FORM) -->
+    <!-- BÖLÜM 2: VERİ EKLEME (TÜM ÖZELLİKLERİYLE) -->
     <div id="add-data" class="section-panel game-wrapper">
         <h2>Deftere Kayıt Ekle</h2>
         <div class="form-group">
@@ -179,7 +184,7 @@
                         <input type="text" class="pyr-w-en" placeholder="EN (I)" style="flex: 1;">
                     </div>
                 </div>
-                <button class="btn-small" onclick="addPyramidWordRow()" style="margin-top: 5px; width: 100%;">➕ Kelime Parçası Ekle</button>
+                <button class="btn-small btn-orange" onclick="addPyramidWordRow()" style="margin-top: 5px; width: 100%;">➕ Kelime Parçası Ekle</button>
 
                 <label style="display:block; margin-top: 15px; color:#2980b9;"><strong>Adım 3: Final İngilizce Cümle</strong></label>
                 <input type="text" id="pyr-final-en" placeholder="Örn: I am studying English at home today." style="border: 2px solid #2980b9;">
@@ -211,9 +216,19 @@
                     <div id="yt-player-div" style="min-height: 250px;"></div>
                 </div>
                 
-                <div style="position: relative; margin-top:15px;">
-                    <button class="btn-orange btn-small" onclick="insertTimestamp()" style="position: absolute; right: 10px; top: -35px;">⏱️ Zaman Ekle</button>
-                    <textarea id="dictation-notebook" class="notebook-paper" placeholder="Duyduklarını buraya yazmaya başla..."></textarea>
+                <!-- Fosforlu Kalemler & Zaman Ekleme -->
+                <div style="margin-top:15px; position:relative;">
+                    <div class="marker-toolbar">
+                        <span style="font-size:0.85rem; font-weight:bold; color:#555;">🖍️ Marker:</span>
+                        <button class="btn-small" style="background:#f1c40f; color:#000;" onclick="applyHighlight('yellow')" title="Kelimeyi seçip sarıya boya">🟨 Sarı</button>
+                        <button class="btn-small" style="background:#2ecc71; color:#000;" onclick="applyHighlight('#2ecc71')" title="Kelimeyi seçip yeşile boya">🟩 Yeşil</button>
+                        <button class="btn-small" style="background:#ecf0f1; color:#000;" onclick="applyHighlight('transparent')" title="Boyayı temizle">🧹 Temizle</button>
+                        
+                        <button class="btn-orange btn-small" onclick="insertTimestamp()" style="margin-left:auto;">⏱️ Zaman Ekle</button>
+                    </div>
+                    
+                    <!-- Defter Alanı (Div yapıldı ki renkler çalışsın) -->
+                    <div id="dictation-notebook" class="notebook-paper" contenteditable="true" data-placeholder="Duyduklarını buraya yazmaya başla..."></div>
                 </div>
             </div>
 
@@ -221,14 +236,11 @@
             <div>
                 <div style="background: #eef2f5; padding: 15px; border-radius: 8px; border: 1px solid #ccc; height: 100%; box-sizing: border-box;">
                     <h3 style="margin-top:0; color:#34495e; font-size:1.1rem;">📄 Transkript (Orijinal Metin)</h3>
-                    <p style="font-size:0.85rem; color:#666;">Aşağıdaki kutuya videonun orijinal metnini yapıştırabilirsin. Böylece defterinle birlikte arşivlenir.</p>
+                    <p style="font-size:0.85rem; color:#666;">Videoyu yükledikten sonra aşağıdaki butona tıklayarak orijinal altyazıyı kopyalayıp buraya yapıştırabilirsin.</p>
                     
-                    <!-- Otomatik Transkript İframe Alanı -->
-                    <div id="transcript-tool" class="hidden" style="margin-bottom: 10px;">
-                        <iframe id="transcript-iframe" style="width: 100%; height: 200px; border: 1px solid #bdc3c7; border-radius: 5px; background:white;"></iframe>
-                        <div style="text-align:right; margin-top:5px;">
-                            <a id="transcript-link" href="#" target="_blank" style="font-size:0.8rem; color:#2980b9; text-decoration:none;">Eğer yukarıda açılmazsa buraya tıklayarak siteden alabilirsin.</a>
-                        </div>
+                    <!-- Yeni Sekmede Açılan Transkript Butonu (İframe hatasını çözer) -->
+                    <div id="transcript-tool" class="hidden" style="margin-bottom: 15px; text-align: center; background: white; padding: 15px; border-radius: 8px; border: 1px dashed #3498db;">
+                        <a id="transcript-link" href="#" target="_blank" style="display:inline-block; padding:10px 20px; background:#3498db; color:white; text-decoration:none; border-radius:5px; font-weight:bold;">📄 Otomatik Transkripti Al (Yeni Sekmede Açılır)</a>
                     </div>
                     
                     <textarea id="original-text" style="height:250px; background:#fff;" placeholder="Karşılaştırmak için orijinal metni (altyazıyı) buraya yapıştır..."></textarea>
@@ -263,13 +275,13 @@
 </div>
 
 <script>
-    // --- VERİTABANI (V5 - Düzeltilmiş Son Sürüm) ---
-    let myData = JSON.parse(localStorage.getItem('myEngDataV5'));
+    // --- VERİTABANI (V6 - Taptaze ve Sorunsuz Sürüm) ---
+    let myData = JSON.parse(localStorage.getItem('myEngDataV6'));
     if (!myData) {
         myData = { vocab: [], otonna: [], pyramid: [], dictations: [] };
         saveToLocal();
     }
-    function saveToLocal() { localStorage.setItem('myEngDataV5', JSON.stringify(myData)); }
+    function saveToLocal() { localStorage.setItem('myEngDataV6', JSON.stringify(myData)); }
 
     // --- SEKME VE FORM KONTROLLERİ ---
     function showSection(sectionId) {
@@ -364,7 +376,7 @@
         });
         document.getElementById("pyramid-list").innerHTML = pyramidHtml || "<p>Henüz piramit yok.</p>";
 
-        // Kutu 5 (Dikte Arşivi - Orijinal Metin Gösterme Eklendi!)
+        // Kutu 5 (Dikte Arşivi)
         let dictHtml = "";
         if(myData.dictations.length === 0) dictHtml = "<p>Henüz arşivlenmiş dikte çalışması yok.</p>";
         else {
@@ -385,7 +397,7 @@
         document.getElementById("dictation-list").innerHTML = dictHtml;
     }
 
-    // --- VERİ KAYDETME MOTURU (TAM VE EKSİKSİZ) ---
+    // --- VERİ KAYDETME MOTURU ---
     function saveData() {
         let sel = document.getElementById('data-type-selector').value;
 
@@ -435,11 +447,10 @@
         document.getElementById('add-feedback').innerText = "✅ Başarıyla eklendi!";
         setTimeout(() => { document.getElementById('add-feedback').innerText = ""; }, 2000);
         
-        // Formu temizle
         document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
     }
 
-    // --- YOUTUBE & DİKTE FONKSİYONLARI ---
+    // --- YOUTUBE & DİKTE (FOSFORLU KALEM) ---
     let ytPlayer;
     let currentVideoId = "";
 
@@ -458,11 +469,9 @@
             });
         }
         
-        // Transkript Aracı Yükleme
+        // Güvenli Transkript Butonunu Aktifleştir (Yeni Sekme)
         document.getElementById('transcript-tool').classList.remove('hidden');
-        let transcriptUrl = `https://youtubetranscript.com/?v=${currentVideoId}`;
-        document.getElementById('transcript-iframe').src = transcriptUrl;
-        document.getElementById('transcript-link').href = transcriptUrl;
+        document.getElementById('transcript-link').href = `https://youtubetranscript.com/?v=${currentVideoId}`;
 
         document.getElementById('dictation-notebook').focus();
     }
@@ -485,23 +494,30 @@
         }
     });
 
+    // Fosforlu Kalem İşlevi
+    function applyHighlight(color) {
+        document.getElementById('dictation-notebook').focus();
+        document.execCommand('backColor', false, color);
+    }
+
+    // Zaman Damgası
     function insertTimestamp() {
         if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') { alert("Önce videoyu yükleyin!"); return; }
         let time = Math.floor(ytPlayer.getCurrentTime());
         let minutes = Math.floor(time / 60); let seconds = time % 60;
         let timeStr = `\n[${minutes}:${seconds < 10 ? '0'+seconds : seconds}] `;
         
-        let ta = document.getElementById('dictation-notebook');
-        let pos = ta.selectionStart; let text = ta.value;
-        ta.value = text.slice(0, pos) + timeStr + text.slice(pos);
-        ta.focus(); ta.selectionStart = ta.selectionEnd = pos + timeStr.length;
+        document.getElementById('dictation-notebook').focus();
+        // Div contenteditable içine imlecin olduğu yere ekle
+        document.execCommand('insertText', false, timeStr);
     }
 
     function saveDictation() {
-        let notes = document.getElementById('dictation-notebook').value.trim();
+        // Div olduğu için innerHTML alıyoruz (renkler kaybolmasın diye)
+        let notes = document.getElementById('dictation-notebook').innerHTML.trim();
         let original = document.getElementById('original-text').value.trim();
         
-        if (!notes) { alert("Defter boş! Önce bir şeyler yazmalısın."); return; }
+        if (!notes || notes === "<br>") { alert("Defter boş! Önce bir şeyler yazmalısın."); return; }
         if (!currentVideoId) { alert("Video linki bulunamadı!"); return; }
 
         myData.dictations.push({ 
@@ -512,9 +528,14 @@
         });
         saveToLocal();
         
-        document.getElementById('dict-feedback').innerText = "✅ Dikte ve Orijinal Metin arşive kaydedildi!";
+        document.getElementById('dict-feedback').innerText = "✅ Dikte (fosforlu renkleriyle birlikte) arşive kaydedildi!";
         setTimeout(() => { document.getElementById('dict-feedback').innerText = ""; }, 3000);
     }
+
+    // Defter Placeholder (Boşken yazı görünsün diye)
+    document.getElementById('dictation-notebook').addEventListener('focus', function() {
+        if(this.innerHTML.trim() === this.getAttribute('data-placeholder')) this.innerHTML = '';
+    });
 
     // --- OYUN MOTORLARI ---
     let currentQIndex = 0, shuffledQuestions = [], currentPuzzleAnswer = "", currentHintIndex = 0;

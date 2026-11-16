@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İngilizce Pratik Koçum & Oyun</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        h1 { text-align: center; color: #2c3e50; }
+        .nav-buttons { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        button { padding: 10px 20px; border: none; border-radius: 8px; background: #3498db; color: white; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #2980b9; }
+        
+        /* Özet Kutuları */
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .box { background: #fafafa; padding: 20px; border-radius: 10px; border: 1px solid #eee; }
+        .box h2 { border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 1.2rem; color: #2c3e50; }
+        .tag { background: #e8f4f8; color: #2980b9; padding: 3px 8px; border-radius: 15px; font-size: 0.85rem; font-weight: bold; }
+        
+        /* Oyun Alanı */
+        #game-section { text-align: center; display: none; }
+        .question-box { background: #fff3cd; padding: 20px; border-radius: 10px; font-size: 1.2rem; margin-bottom: 20px; border: 1px solid #ffeeba; }
+        .options { display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: auto; }
+        .option-btn { background: #ecf0f1; color: #333; border: 2px solid #bdc3c7; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .option-btn:hover { background: #d5dbdb; }
+        #feedback { margin-top: 20px; font-weight: bold; font-size: 1.2rem; min-height: 30px; }
+        
+        .hidden { display: none !important; }
+        @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚀 Pratik Koçum & Mini Oyun</h1>
+    
+    <div class="nav-buttons">
+        <button onclick="showSection('summary')">📝 Günün Özeti (Defter)</button>
+        <button onclick="showSection('game')">🎮 Oyunu Başlat (Test)</button>
+    </div>
+
+    <!-- ÖZET BÖLÜMÜ (DEFTER) -->
+    <div id="summary-section">
+        <div class="grid-container">
+            <div class="box">
+                <h2>📦 Kutu 1: Yeni Kelimeler</h2>
+                <div id="words-list"></div>
+            </div>
+            <div class="box">
+                <h2>💬 Kutu 2: Günlük Kalıplar</h2>
+                <div id="phrases-list"></div>
+            </div>
+            <div class="box">
+                <h2>🔄 Kutu 3: Otonna Dönüşümü</h2>
+                <p><strong>Before:</strong> Companies use social media to get more customers.</p>
+                <p><strong>After:</strong> To expand their customer base, companies utilize digital platforms since the rise of digitalization.</p>
+            </div>
+            <div class="box">
+                <h2>🧩 Kutu 4: Cümle Dizilim Formülü</h2>
+                <p><em>Özne + Yardımcı Fiil + Fiil + Nesne + Yer + Zaman</em></p>
+                <p><strong>(+)</strong> I am studying English at home today.<br>
+                <strong>(-)</strong> I am not studying English at home today.<br>
+                <strong>(?)</strong> Are you studying English at home today?</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- OYUN BÖLÜMÜ -->
+    <div id="game-section">
+        <h2 id="round-title">Tur 1: Tanımdan Kelimeyi Bul</h2>
+        <div class="question-box" id="question-text">Soru buraya gelecek...</div>
+        <div class="options" id="options-area"></div>
+        <div id="feedback"></div>
+        <button id="next-btn" class="hidden" onclick="nextQuestion()" style="margin-top: 20px;">Sonraki Soru ➡️</button>
+    </div>
+</div>
+
+<script>
+    // --- VERİTABANI (DEFTERİMİZ) ---
+    // Oyunda sorulacak ve özet kutusunda gösterilecek kelime/kalıp listemiz.
+    const vocabulary = [
+        { word: "Utilize", type: "Verb / Fiil", pron: "yutilayz", tr: "Faydalanmak, etkili kullanmak", en: "To use something in an effective way." },
+        { word: "Expand", type: "Verb / Fiil", pron: "ikspend", tr: "Genişletmek, büyütmek", en: "To make something larger in size or amount." },
+        { word: "Attract", type: "Verb / Fiil", pron: "etrekt", tr: "Cezbetmek, çekmek", en: "To cause someone to choose or be interested in something." },
+        { word: "It depends on...", type: "Phrase / Kalıp", pron: "it dipendz on", tr: "...e / ...a bağlı", en: "Used to say that something is affected by something else." }
+    ];
+
+    // Özet kutularını veritabanından doldur
+    window.onload = () => {
+        let wordsHtml = "", phrasesHtml = "";
+        vocabulary.forEach(v => {
+            let item = `<p><strong>${v.word}</strong> <span class="tag">${v.type}</span><br>
+                        <em>Okunuşu:</em> ${v.pron}<br>
+                        <em>Anlamı:</em> ${v.tr}<br>
+                        <em>Tanım:</em> ${v.en}</p>`;
+            if(v.type.includes("Phrase")) phrasesHtml += item;
+            else wordsHtml += item;
+        });
+        document.getElementById("words-list").innerHTML = wordsHtml;
+        document.getElementById("phrases-list").innerHTML = phrasesHtml;
+    };
+
+    // --- SEKME GEÇİŞLERİ ---
+    function showSection(section) {
+        document.getElementById('summary-section').style.display = section === 'summary' ? 'block' : 'none';
+        document.getElementById('game-section').style.display = section === 'game' ? 'block' : 'none';
+        if(section === 'game') startGame();
+    }
+
+    // --- OYUN MOTORU ---
+    let currentRound = 1; 
+    let currentQuestionIndex = 0;
+    let gameQuestions = [];
+
+    function startGame() {
+        currentRound = 1;
+        currentQuestionIndex = 0;
+        document.getElementById('feedback').innerText = "";
+        
+        // Soruları karıştır (Şimdilik örnek olarak listeyi aynen alıyoruz)
+        gameQuestions = [...vocabulary].sort(() => 0.5 - Math.random());
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        document.getElementById('next-btn').classList.add('hidden');
+        document.getElementById('feedback').innerText = "";
+        const optionsArea = document.getElementById('options-area');
+        optionsArea.innerHTML = "";
+        
+        if (currentQuestionIndex >= gameQuestions.length) {
+            // Tur 1 bittiyse Tur 2'ye geç
+            if (currentRound === 1) {
+                currentRound = 2;
+                currentQuestionIndex = 0;
+                gameQuestions = [...vocabulary].sort(() => 0.5 - Math.random());
+                alert("Harika! Tur 1 bitti. Şimdi Tur 2: Kelimeden Tanımı Bulma zamanı!");
+            } else {
+                document.getElementById('question-text').innerHTML = "🎉 Tebrikler! Tüm oyunu tamamladın.";
+                return;
+            }
+        }
+
+        let q = gameQuestions[currentQuestionIndex];
+        document.getElementById('round-title').innerText = currentRound === 1 ? "Tur 1: Tanımı Oku, Kelimeyi Seç" : "Tur 2: Kelimeyi Oku, Tanımı Seç";
+        
+        // Yanlış şıkları oluştur
+        let wrongOptions = vocabulary.filter(v => v.word !== q.word).sort(() => 0.5 - Math.random()).slice(0, 2);
+        let allOptions = [q, ...wrongOptions].sort(() => 0.5 - Math.random());
+
+        if (currentRound === 1) {
+            document.getElementById('question-text').innerHTML = `<strong>İngilizce Tanım:</strong> ${q.en}<br><span style="font-size:0.9rem; color:#666;">(Anlamı: ${q.tr})</span>`;
+            allOptions.forEach(opt => {
+                let btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = opt.word;
+                btn.onclick = () => checkAnswer(opt.word === q.word, btn);
+                optionsArea.appendChild(btn);
+            });
+        } else {
+            document.getElementById('question-text').innerHTML = `<strong>Kelime:</strong> ${q.word}`;
+            allOptions.forEach(opt => {
+                let btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = opt.en;
+                btn.onclick = () => checkAnswer(opt.word === q.word, btn);
+                optionsArea.appendChild(btn);
+            });
+        }
+    }
+
+    function checkAnswer(isCorrect, btn) {
+        let options = document.querySelectorAll('.option-btn');
+        options.forEach(o => o.disabled = true); // Seçim yapıldıktan sonra butonları kilitle
+
+        const feedback = document.getElementById('feedback');
+        if (isCorrect) {
+            btn.style.background = "#2ecc71"; // Yeşil
+            btn.style.color = "white";
+            feedback.innerText = "✅ Doğru!";
+            feedback.style.color = "#27ae60";
+        } else {
+            btn.style.background = "#e74c3c"; // Kırmızı
+            btn.style.color = "white";
+            feedback.innerText = "❌ Yanlış! Bir dahakine...";
+            feedback.style.color = "#c0392b";
+        }
+        document.getElementById('next-btn').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        loadQuestion();
+    }
+</script>
+
+</body>
+</html>

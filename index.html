@@ -8,7 +8,7 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         h1 { text-align: center; color: #2c3e50; }
         .nav-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px; }
         button { padding: 10px 20px; border: none; border-radius: 8px; background: #3498db; color: white; font-size: 15px; cursor: pointer; transition: 0.3s; font-weight: bold; }
@@ -36,8 +36,8 @@
         .pyramid-final { background: #e8f4f8; padding: 10px; border-radius: 5px; font-weight: bold; color: #2c3e50; text-align: center; }
 
         /* DEFTER (DICTATION) TASARIMI */
-        .dictation-wrapper { display: flex; flex-direction: column; gap: 20px; }
-        .video-container { width: 100%; max-width: 640px; margin: auto; background: #000; border-radius: 8px; overflow: hidden; }
+        .dictation-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;}
+        .video-container { width: 100%; background: #000; border-radius: 8px; overflow: hidden; }
         
         .notebook-paper {
             background-color: #fdf5e6;
@@ -57,7 +57,7 @@
             outline: none;
         }
         
-        .controls-info { font-size: 0.9rem; color: #7f8c8d; background: #eee; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; }
+        .controls-info { font-size: 0.9rem; color: #7f8c8d; background: #eee; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; margin-bottom: 10px;}
         
         /* Oyun Alanları */
         .game-wrapper { text-align: center; }
@@ -69,7 +69,7 @@
         .feedback-area { margin-top: 20px; font-weight: bold; font-size: 1.2rem; min-height: 30px; }
         .hidden { display: none !important; }
         
-        @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .grid-container, .dictation-layout { grid-template-columns: 1fr; } }
         hr { border: 0; border-top: 1px solid #ddd; margin: 15px 0; }
     </style>
 </head>
@@ -89,11 +89,22 @@
     <!-- BÖLÜM 1: DEFTERİM -->
     <div id="summary" class="section-panel active-section">
         <div class="grid-container">
-            <div class="box"><h2>📦 Kutu 1: Yeni Kelimeler</h2><div id="words-list"></div></div>
-            <div class="box"><h2>💬 Kutu 2: Günlük Kalıplar</h2><div id="phrases-list"></div></div>
-            <div class="box" style="grid-column: 1 / -1;"><h2>🔄 Kutu 3: Otonna Dönüşümü</h2><div id="otonna-list"></div></div>
-            <div class="box" style="grid-column: 1 / -1;"><h2>🏗️ Kutu 4: Piramit Cümle Kurma</h2><div id="pyramid-list"></div></div>
-            <!-- YENİ KUTU 5: DİKTE ARŞİVİ -->
+            <div class="box">
+                <h2>📦 Kutu 1: Yeni Kelimeler</h2>
+                <div id="words-list"></div>
+            </div>
+            <div class="box">
+                <h2>💬 Kutu 2: Günlük Kalıplar</h2>
+                <div id="phrases-list"></div>
+            </div>
+            <div class="box" style="grid-column: 1 / -1;">
+                <h2>🔄 Kutu 3: Otonna Dönüşümü</h2>
+                <div id="otonna-list"></div>
+            </div>
+            <div class="box" style="grid-column: 1 / -1;">
+                <h2>🏗️ Kutu 4: Piramit Cümle Kurma</h2>
+                <div id="pyramid-list"></div>
+            </div>
             <div class="box" style="grid-column: 1 / -1; background: #fdf5e6; border:1px solid #e8a0a0;">
                 <h2 style="border-bottom-color:#e74c3c; color:#c0392b;">🎧 Kutu 5: Dikte & Dinleme Arşivi</h2>
                 <div id="dictation-list"></div>
@@ -101,7 +112,7 @@
         </div>
     </div>
 
-    <!-- BÖLÜM 2: VERİ EKLEME (Mevcut formlar gizli, scriptle açılır) -->
+    <!-- BÖLÜM 2: VERİ EKLEME (TAM VE EKSİKSİZ FORM) -->
     <div id="add-data" class="section-panel game-wrapper">
         <h2>Deftere Kayıt Ekle</h2>
         <div class="form-group">
@@ -113,104 +124,322 @@
                 <option value="pyramid">Kutu 4: Piramit Cümle</option>
             </select>
             <hr>
+            
+            <!-- KELİME & KALIP FORMU -->
             <div id="form-vocab">
-                <input type="text" id="new-word" placeholder="Kelime veya Kalıp">
-                <select id="new-type" style="margin-top:10px;"><option>Verb / Fiil</option><option>Noun / İsim</option><option>Phrase / Kalıp</option></select>
-                <input type="text" id="new-pron" placeholder="Okunuşu/Telaffuz" style="margin-top: 10px;">
-                <input type="text" id="new-tr" placeholder="Türkçe Anlamı" style="margin-top: 10px;">
-                <input type="text" id="new-en" placeholder="İngilizce Tanımı" style="margin-top: 10px;">
-                <div id="scenario-section" class="hidden" style="margin-top: 15px;"><input type="text" class="scenario-input" placeholder="Senaryo 1"></div>
+                <input type="text" id="new-word" placeholder="Kelime veya Kalıp (Örn: Utilize)">
+                
+                <div id="type-container" style="margin-top: 10px;">
+                    <select id="new-type" onchange="checkCustomType()">
+                        <option value="Verb / Fiil">Verb / Fiil</option>
+                        <option value="Noun / İsim">Noun / İsim</option>
+                        <option value="Adjective / Sıfat">Adjective / Sıfat</option>
+                        <option value="Adverb / Zarf">Adverb / Zarf</option>
+                        <option value="Phrase / Kalıp">Phrase / Kalıp</option>
+                        <option value="Question / Soru Kalıbı">Question / Soru Kalıbı</option>
+                        <option value="custom">Diğer (Kendim Yazacağım)</option>
+                    </select>
+                    <input type="text" id="custom-type" placeholder="Türü kendin yaz..." class="hidden" style="margin-top: 5px;">
+                </div>
+                
+                <input type="text" id="new-pron" placeholder="Okunuşu/Telaffuz (Örn: yutilayz)" style="margin-top: 10px;">
+                <input type="text" id="new-tr" placeholder="Türkçe Anlamı (Örn: Faydalanmak)" style="margin-top: 10px;">
+                <input type="text" id="new-en" placeholder="İngilizce Tanımı (Örn: To use effectively)" style="margin-top: 10px;">
+                
+                <!-- Senaryo Alanı -->
+                <div id="scenario-section" class="hidden" style="margin-top: 15px; background: #fff; padding: 10px; border: 1px dashed #ccc; border-radius: 5px;">
+                    <label style="font-weight: bold; color: #d35400;">🎬 Senaryolar:</label>
+                    <div id="scenario-container">
+                        <input type="text" class="scenario-input" placeholder="Senaryo 1 (Örn: Hava durumuna bağlı -> It depends on the weather)">
+                    </div>
+                    <button class="btn-small btn-orange" onclick="addScenarioField()" style="margin-top: 10px; width: 100%;">➕ Yeni Senaryo Ekle</button>
+                </div>
             </div>
-            <!-- Diğer formlar basitleştirildi, scriptle yönetiliyor -->
-            <div id="form-otonna" class="hidden"><input type="text" id="ot-before" placeholder="Before"><input type="text" id="ot-after" placeholder="After" style="margin-top:10px;"></div>
-            <div id="form-pyramid" class="hidden"><input type="text" id="pyr-target-tr" placeholder="Hedef TR"><input type="text" id="pyr-final-en" placeholder="Final EN" style="margin-top:10px;"></div>
+
+            <!-- OTONNA FORMU -->
+            <div id="form-otonna" class="hidden">
+                <label><strong>Before (Önce):</strong></label>
+                <input type="text" id="ot-before" placeholder="İngilizce (Örn: Companies use...)">
+                <input type="text" id="ot-before-tr" placeholder="Türkçesi (Örn: Şirketler kullanır...)" style="margin-top: 5px;">
+                
+                <label style="display:block; margin-top: 10px;"><strong>After (Sonra):</strong></label>
+                <input type="text" id="ot-after" placeholder="İngilizce (Örn: To expand their...)">
+                <input type="text" id="ot-after-tr" placeholder="Türkçesi (Örn: Müşteri tabanını genişletmek için...)" style="margin-top: 5px;">
+            </div>
+
+            <!-- PİRAMİT FORMU -->
+            <div id="form-pyramid" class="hidden">
+                <label><strong>Adım 1: Hedef Türkçe Cümle</strong></label>
+                <input type="text" id="pyr-target-tr" placeholder="Örn: Bugün evde İngilizce çalışıyorum.">
+                
+                <label style="display:block; margin-top: 15px;"><strong>Adım 2: Kelimeleri Parçala (Tuğlalar)</strong></label>
+                <div id="pyr-words-container" style="background: #fff; padding: 10px; border: 1px dashed #ccc; border-radius: 5px;">
+                    <div class="pyr-word-row" style="display: flex; gap: 5px; margin-bottom: 5px;">
+                        <input type="text" class="pyr-w-tr" placeholder="TR (Ben)" style="flex: 1;">
+                        <input type="text" class="pyr-w-en" placeholder="EN (I)" style="flex: 1;">
+                    </div>
+                </div>
+                <button class="btn-small" onclick="addPyramidWordRow()" style="margin-top: 5px; width: 100%;">➕ Kelime Parçası Ekle</button>
+
+                <label style="display:block; margin-top: 15px; color:#2980b9;"><strong>Adım 3: Final İngilizce Cümle</strong></label>
+                <input type="text" id="pyr-final-en" placeholder="Örn: I am studying English at home today." style="border: 2px solid #2980b9;">
+            </div>
+
             <button class="btn-green" onclick="saveData()" style="margin-top: 20px;">Kaydet ve Deftere Ekle</button>
-            <p id="add-feedback" style="color: #27ae60; font-weight: bold;"></p>
+            <p id="add-feedback" style="color: #27ae60; font-weight: bold; text-align:center;"></p>
         </div>
     </div>
 
-    <!-- BÖLÜM 5: YENİ - DİNLE VE YAZ (DİKTE) -->
+    <!-- BÖLÜM 5: DİNLE VE YAZ (DİKTE) -->
     <div id="dictation" class="section-panel">
         <h2 style="text-align:center;">🎧 Dinle & Yaz (Dikte Atölyesi)</h2>
-        <div class="dictation-wrapper">
-            
-            <!-- Video Yükleme Alanı -->
-            <div style="display:flex; gap:10px; justify-content:center;">
-                <input type="text" id="yt-url" placeholder="YouTube Linkini Yapıştır (Örn: https://youtu.be/...)" style="max-width: 400px;">
-                <button class="btn-green" onclick="loadYouTubeVideo()">Yükle</button>
+        
+        <div style="display:flex; gap:10px; justify-content:center; margin-bottom:15px;">
+            <input type="text" id="yt-url" placeholder="YouTube Linkini Yapıştır (Örn: https://youtu.be/...)" style="max-width: 500px;">
+            <button class="btn-green" onclick="loadYouTubeVideo()">Videoyu Yükle</button>
+        </div>
+        
+        <div class="controls-info">
+            ⌨️ <strong>Kısayollar:</strong> (Deftere yazarken çalışır) <br>
+            <span style="color:#d35400;">Ctrl + Boşluk (Space)</span> = Başlat/Durdur | <span style="color:#2980b9;">Ctrl + Sol Ok</span> = 5 Saniye Geri Sar
+        </div>
+
+        <div class="dictation-layout">
+            <!-- Sol Sütun: Video ve Defter -->
+            <div>
+                <div class="video-container" id="video-wrapper">
+                    <div id="yt-player-div" style="min-height: 250px;"></div>
+                </div>
+                
+                <div style="position: relative; margin-top:15px;">
+                    <button class="btn-orange btn-small" onclick="insertTimestamp()" style="position: absolute; right: 10px; top: -35px;">⏱️ Zaman Ekle</button>
+                    <textarea id="dictation-notebook" class="notebook-paper" placeholder="Duyduklarını buraya yazmaya başla..."></textarea>
+                </div>
             </div>
 
-            <!-- Video Alanı -->
-            <div class="video-container" id="video-wrapper" class="hidden">
-                <div id="yt-player-div"></div>
+            <!-- Sağ Sütun: Transkript ve Analiz -->
+            <div>
+                <div style="background: #eef2f5; padding: 15px; border-radius: 8px; border: 1px solid #ccc; height: 100%; box-sizing: border-box;">
+                    <h3 style="margin-top:0; color:#34495e; font-size:1.1rem;">📄 Transkript (Orijinal Metin)</h3>
+                    <p style="font-size:0.85rem; color:#666;">Aşağıdaki kutuya videonun orijinal metnini yapıştırabilirsin. Böylece defterinle birlikte arşivlenir.</p>
+                    
+                    <!-- Otomatik Transkript İframe Alanı -->
+                    <div id="transcript-tool" class="hidden" style="margin-bottom: 10px;">
+                        <iframe id="transcript-iframe" style="width: 100%; height: 200px; border: 1px solid #bdc3c7; border-radius: 5px; background:white;"></iframe>
+                        <div style="text-align:right; margin-top:5px;">
+                            <a id="transcript-link" href="#" target="_blank" style="font-size:0.8rem; color:#2980b9; text-decoration:none;">Eğer yukarıda açılmazsa buraya tıklayarak siteden alabilirsin.</a>
+                        </div>
+                    </div>
+                    
+                    <textarea id="original-text" style="height:250px; background:#fff;" placeholder="Karşılaştırmak için orijinal metni (altyazıyı) buraya yapıştır..."></textarea>
+                    
+                    <button class="btn-purple" onclick="saveDictation()" style="width:100%; margin-top:15px;">📥 Çalışmayı Arşive Kaydet</button>
+                    <p id="dict-feedback" style="color: #8e44ad; font-weight: bold; text-align:center;"></p>
+                </div>
             </div>
-
-            <div class="controls-info">
-                ⌨️ <strong>Kısayollar:</strong> (Deftere yazarken çalışır)<br>
-                <span style="color:#d35400;">Ctrl + Boşluk (Space)</span> = Başlat / Durdur | <span style="color:#2980b9;">Ctrl + Sol Ok</span> = 5 Saniye Geri Sar
-            </div>
-
-            <!-- Dikte Defteri -->
-            <div style="position: relative;">
-                <button class="btn-orange btn-small" onclick="insertTimestamp()" style="position: absolute; right: 10px; top: -35px;">⏱️ Zaman Ekle</button>
-                <textarea id="dictation-notebook" class="notebook-paper" placeholder="Duyduklarını buraya yazmaya başla..."></textarea>
-            </div>
-
-            <!-- Hata Kontrol (Orijinal Metin) -->
-            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ccc;">
-                <label style="font-weight:bold; color:#7f8c8d; cursor:pointer;" onclick="toggleOriginalText()">
-                    🔍 Analiz: Orijinal Metni Göster/Gizle (Tıkla)
-                </label>
-                <textarea id="original-text" class="hidden" style="margin-top:10px; min-height:100px; background:#fff;" placeholder="Karşılaştırmak için orijinal metni (altyazıyı) buraya yapıştırabilirsin..."></textarea>
-            </div>
-
-            <button class="btn-purple" onclick="saveDictation()">📥 Dikteyi Arşive Kaydet</button>
-            <p id="dict-feedback" style="color: #8e44ad; font-weight: bold; text-align:center;"></p>
         </div>
     </div>
 
     <!-- OYUNLAR -->
-    <div id="game-test" class="section-panel game-wrapper"><h2>Çoktan Seçmeli Test</h2><div id="test-question" class="question-box"></div><div id="test-options" class="options"></div><div id="test-feedback" class="feedback-area"></div><button id="test-next" class="hidden" onclick="nextTestQuestion()">Sonraki Soru</button></div>
-    <div id="game-puzzle" class="section-panel game-wrapper"><h2>🧩 Çengel Bulmaca</h2><div id="puzzle-question" class="question-box"></div><div class="puzzle-input-area"><input type="text" id="puzzle-input" autocomplete="off"><button class="btn-green" onclick="checkPuzzleAnswer()">Kontrol Et</button><button class="btn-orange" onclick="givePuzzleHint()">İpucu</button></div><div id="puzzle-feedback" class="feedback-area"></div><button id="puzzle-next" class="hidden" onclick="nextPuzzleQuestion()">Sonraki</button></div>
+    <div id="game-test" class="section-panel game-wrapper">
+        <h2>Çoktan Seçmeli Test</h2>
+        <div id="test-question" class="question-box"></div>
+        <div id="test-options" class="options"></div>
+        <div id="test-feedback" class="feedback-area"></div>
+        <button id="test-next" class="hidden" onclick="nextTestQuestion()" style="margin-top: 20px;">Sonraki Soru</button>
+    </div>
+
+    <div id="game-puzzle" class="section-panel game-wrapper">
+        <h2>🧩 Çengel Bulmaca</h2>
+        <div id="puzzle-question" class="question-box"></div>
+        <div class="puzzle-input-area">
+            <input type="text" id="puzzle-input" autocomplete="off">
+            <button class="btn-green" onclick="checkPuzzleAnswer()">Kontrol Et</button>
+            <button class="btn-orange" onclick="givePuzzleHint()">İpucu</button>
+        </div>
+        <div id="puzzle-feedback" class="feedback-area"></div>
+        <button id="puzzle-next" class="hidden" onclick="nextPuzzleQuestion()" style="margin-top: 20px;">Sonraki</button>
+    </div>
 </div>
 
 <script>
-    // --- VERİTABANI (V4 - Dikte Eklendi) ---
-    let myData = JSON.parse(localStorage.getItem('myEngDataV4'));
+    // --- VERİTABANI (V5 - Düzeltilmiş Son Sürüm) ---
+    let myData = JSON.parse(localStorage.getItem('myEngDataV5'));
     if (!myData) {
         myData = { vocab: [], otonna: [], pyramid: [], dictations: [] };
         saveToLocal();
     }
-    function saveToLocal() { localStorage.setItem('myEngDataV4', JSON.stringify(myData)); }
+    function saveToLocal() { localStorage.setItem('myEngDataV5', JSON.stringify(myData)); }
 
-    // --- SEKME KONTROLÜ ---
+    // --- SEKME VE FORM KONTROLLERİ ---
     function showSection(sectionId) {
         document.querySelectorAll('.section-panel').forEach(panel => panel.classList.remove('active-section'));
         document.getElementById(sectionId).classList.add('active-section');
         if(sectionId === 'summary') renderSummary();
+        if(sectionId === 'game-test') startTestGame();
+        if(sectionId === 'game-puzzle') startPuzzleGame();
     }
 
-    // --- DEFTER (SUMMARY) ÇİZİMİ ---
+    function toggleForms() {
+        let sel = document.getElementById('data-type-selector').value;
+        document.getElementById('form-vocab').classList.add('hidden');
+        document.getElementById('form-otonna').classList.add('hidden');
+        document.getElementById('form-pyramid').classList.add('hidden');
+        document.getElementById('scenario-section').classList.add('hidden');
+
+        if(sel === 'word') { document.getElementById('form-vocab').classList.remove('hidden'); }
+        if(sel === 'phrase') { 
+            document.getElementById('form-vocab').classList.remove('hidden');
+            document.getElementById('scenario-section').classList.remove('hidden');
+            document.getElementById('new-type').value = "Phrase / Kalıp"; 
+        }
+        if(sel === 'otonna') { document.getElementById('form-otonna').classList.remove('hidden'); }
+        if(sel === 'pyramid') { document.getElementById('form-pyramid').classList.remove('hidden'); }
+    }
+
+    function checkCustomType() {
+        let typeSel = document.getElementById('new-type').value;
+        if(typeSel === 'custom') document.getElementById('custom-type').classList.remove('hidden');
+        else document.getElementById('custom-type').classList.add('hidden');
+    }
+
+    function addScenarioField() {
+        let container = document.getElementById('scenario-container');
+        let input = document.createElement('input');
+        input.type = 'text'; input.className = 'scenario-input';
+        input.placeholder = 'Yeni senaryo...'; input.style.marginTop = '5px';
+        container.appendChild(input);
+    }
+
+    function addPyramidWordRow() {
+        let container = document.getElementById('pyr-words-container');
+        let div = document.createElement('div');
+        div.className = 'pyr-word-row'; div.style = "display: flex; gap: 5px; margin-bottom: 5px;";
+        div.innerHTML = `<input type="text" class="pyr-w-tr" placeholder="TR" style="flex: 1;"><input type="text" class="pyr-w-en" placeholder="EN" style="flex: 1;">`;
+        container.appendChild(div);
+    }
+
+    // --- DEFTERİ (SUMMARY) ÇİZME ---
     function renderSummary() {
-        // (Kutu 1, 2, 3, 4 kodları uzunluktan dolayı özetlendi, sorunsuz çalışıyor)
-        // Kutu 5: Dikte Arşivi Çizimi
+        // Kutu 1 & 2
+        let wordsHtml = "", phrasesHtml = "";
+        myData.vocab.forEach(v => {
+            let scHtml = "";
+            if (v.scenarios && v.scenarios.length > 0) {
+                scHtml = `<div style="margin-top:5px; font-size:0.9rem; color:#d35400;"><strong>🎬 Senaryolar:</strong><ul style="margin:2px 0; padding-left:20px;">`;
+                v.scenarios.forEach(sc => scHtml += `<li>${sc}</li>`);
+                scHtml += `</ul></div>`;
+            }
+            let itemHtml = `<div style="margin-bottom:15px; border-bottom:1px solid #ddd; padding-bottom:10px;">
+                <strong>${v.word}</strong> <span class="tag">${v.type}</span><br>
+                <span style="font-size: 0.9rem;">🗣️ <em>Okunuşu:</em> ${v.pron} <br> 🇹🇷 <em>Anlamı:</em> ${v.tr} <br> 📖 <em>Tanımı:</em> ${v.en}</span>
+                ${scHtml}
+            </div>`;
+            if(v.typeCat === 'phrase') phrasesHtml += itemHtml;
+            else wordsHtml += itemHtml;
+        });
+        document.getElementById("words-list").innerHTML = wordsHtml || "<p>Henüz kelime yok.</p>";
+        document.getElementById("phrases-list").innerHTML = phrasesHtml || "<p>Henüz kalıp yok.</p>";
+
+        // Kutu 3
+        let otonnaHtml = "";
+        myData.otonna.forEach(o => {
+            otonnaHtml += `<div style="margin-bottom:15px; border-bottom:1px solid #ddd; padding-bottom:10px;">
+                <p style="margin: 0 0 5px 0;"><strong>Before:</strong> ${o.before} <br><span style="font-size:0.85rem; color:#7f8c8d;">(${o.beforeTr})</span></p>
+                <p style="margin: 0;"><strong>After:</strong> ${o.after} <br><span style="font-size:0.85rem; color:#7f8c8d;">(${o.afterTr})</span></p>
+            </div>`;
+        });
+        document.getElementById("otonna-list").innerHTML = otonnaHtml || "<p>Henüz Otonna kaydı yok.</p>";
+
+        // Kutu 4
+        let pyramidHtml = "";
+        myData.pyramid.forEach(p => {
+            let steps = "";
+            p.words.forEach(w => steps += `<div><span style="color:#7f8c8d;">${w.tr}</span> ➡️ <strong>${w.en}</strong></div>`);
+            pyramidHtml += `<div class="pyramid-card">
+                <div style="font-weight:bold; color:#e67e22; margin-bottom:5px;">🇹🇷 ${p.targetTr}</div>
+                <div class="pyramid-step">${steps}</div>
+                <div class="pyramid-final">🇬🇧 ${p.finalEn}</div>
+            </div>`;
+        });
+        document.getElementById("pyramid-list").innerHTML = pyramidHtml || "<p>Henüz piramit yok.</p>";
+
+        // Kutu 5 (Dikte Arşivi - Orijinal Metin Gösterme Eklendi!)
         let dictHtml = "";
         if(myData.dictations.length === 0) dictHtml = "<p>Henüz arşivlenmiş dikte çalışması yok.</p>";
         else {
             myData.dictations.forEach((d, index) => {
+                let origHtml = d.originalText ? `<div style="margin-top:10px; padding:10px; background:#eef2f5; border-radius:5px; font-size:0.9rem;"><strong>📄 Orijinal Metin:</strong><br>${d.originalText.replace(/\n/g, '<br>')}</div>` : '';
+                
                 dictHtml += `<div style="background:#fff; padding:15px; border-radius:5px; margin-bottom:15px; box-shadow:0 1px 3px rgba(0,0,0,0.1); border-left:4px solid #9b59b6;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <strong>Çalışma ${index + 1}</strong>
-                        <a href="https://youtube.com/watch?v=${d.videoId}" target="_blank" style="color:#3498db; font-size:0.9rem;">📺 Videoyu Aç</a>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+                        <strong>Çalışma ${index + 1} <span style="font-size:0.8rem; color:#999;">(${d.date})</span></strong>
+                        <a href="https://youtube.com/watch?v=${d.videoId}" target="_blank" style="color:#3498db; font-size:0.9rem; text-decoration:none; font-weight:bold;">📺 Videoyu Aç</a>
                     </div>
                     <div style="font-family:'Comic Sans MS', cursive; background:#fdf5e6; padding:10px; border-radius:5px; font-size:0.95rem; white-space:pre-wrap;">${d.notes}</div>
+                    <button class="btn-small btn-purple" style="margin-top:10px;" onclick="this.nextElementSibling.classList.toggle('hidden')">🔍 Orijinal Metni Göster/Gizle</button>
+                    <div class="hidden">${origHtml}</div>
                 </div>`;
             });
         }
         document.getElementById("dictation-list").innerHTML = dictHtml;
     }
 
-    // --- YOUTUBE API VE DİKTE MOTORU ---
+    // --- VERİ KAYDETME MOTURU (TAM VE EKSİKSİZ) ---
+    function saveData() {
+        let sel = document.getElementById('data-type-selector').value;
+
+        if(sel === 'word' || sel === 'phrase') {
+            let w = document.getElementById('new-word').value.trim();
+            let typeSel = document.getElementById('new-type').value;
+            let type = typeSel === 'custom' ? document.getElementById('custom-type').value.trim() : typeSel;
+            let pron = document.getElementById('new-pron').value.trim();
+            let tr = document.getElementById('new-tr').value.trim();
+            let en = document.getElementById('new-en').value.trim();
+            
+            if(!w || !en) { alert("Kelime ve İngilizce tanım boş bırakılamaz!"); return; }
+
+            let scenarios = [];
+            if (sel === 'phrase') {
+                document.querySelectorAll('.scenario-input').forEach(inp => {
+                    if (inp.value.trim() !== "") scenarios.push(inp.value.trim());
+                });
+            }
+            
+            myData.vocab.push({ id: Date.now(), typeCat: sel, word: w, type: type, pron: pron, tr: tr, en: en, scenarios: scenarios });
+        } 
+        else if (sel === 'otonna') {
+            let b = document.getElementById('ot-before').value.trim();
+            let bTr = document.getElementById('ot-before-tr').value.trim();
+            let a = document.getElementById('ot-after').value.trim();
+            let aTr = document.getElementById('ot-after-tr').value.trim();
+            if(!b || !a) { alert("Before ve After cümleleri zorunludur!"); return; }
+            myData.otonna.push({ before: b, beforeTr: bTr, after: a, afterTr: aTr });
+        }
+        else if (sel === 'pyramid') {
+            let tTr = document.getElementById('pyr-target-tr').value.trim();
+            let fEn = document.getElementById('pyr-final-en').value.trim();
+            if(!tTr || !fEn) { alert("Hedef Türkçe ve Final İngilizce cümleleri zorunludur!"); return; }
+            
+            let wordsArr = [];
+            document.querySelectorAll('.pyr-word-row').forEach(row => {
+                let wTr = row.querySelector('.pyr-w-tr').value.trim();
+                let wEn = row.querySelector('.pyr-w-en').value.trim();
+                if(wTr || wEn) wordsArr.push({ tr: wTr, en: wEn });
+            });
+
+            myData.pyramid.push({ targetTr: tTr, words: wordsArr, finalEn: fEn });
+        }
+
+        saveToLocal();
+        document.getElementById('add-feedback').innerText = "✅ Başarıyla eklendi!";
+        setTimeout(() => { document.getElementById('add-feedback').innerText = ""; }, 2000);
+        
+        // Formu temizle
+        document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
+    }
+
+    // --- YOUTUBE & DİKTE FONKSİYONLARI ---
     let ytPlayer;
     let currentVideoId = "";
 
@@ -221,22 +450,27 @@
         
         currentVideoId = match[1];
         
-        if (ytPlayer) {
-            ytPlayer.loadVideoById(currentVideoId);
-        } else {
+        if (ytPlayer) { ytPlayer.loadVideoById(currentVideoId); } 
+        else {
             ytPlayer = new YT.Player('yt-player-div', {
-                height: '360', width: '100%', videoId: currentVideoId,
+                height: '100%', width: '100%', videoId: currentVideoId,
                 playerVars: { 'playsinline': 1 }
             });
         }
+        
+        // Transkript Aracı Yükleme
+        document.getElementById('transcript-tool').classList.remove('hidden');
+        let transcriptUrl = `https://youtubetranscript.com/?v=${currentVideoId}`;
+        document.getElementById('transcript-iframe').src = transcriptUrl;
+        document.getElementById('transcript-link').href = transcriptUrl;
+
         document.getElementById('dictation-notebook').focus();
     }
 
-    // KLAVYE KISAYOLLARI (Defter üzerinde çalışır)
+    // Klavye Kısayolları (Ctrl+Space ve Ctrl+Left)
     document.getElementById('dictation-notebook').addEventListener('keydown', function(e) {
         if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
         
-        // Oynat/Duraklat (Ctrl + Space)
         if (e.ctrlKey && e.code === 'Space') {
             e.preventDefault();
             let state = ytPlayer.getPlayerState();
@@ -244,7 +478,6 @@
             else ytPlayer.playVideo();
         }
         
-        // Geri Sar (Ctrl + Sol Ok)
         if (e.ctrlKey && e.code === 'ArrowLeft') {
             e.preventDefault();
             let currentTime = ytPlayer.getCurrentTime();
@@ -252,43 +485,125 @@
         }
     });
 
-    // ZAMAN DAMGASI
     function insertTimestamp() {
         if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') { alert("Önce videoyu yükleyin!"); return; }
-        
         let time = Math.floor(ytPlayer.getCurrentTime());
-        let minutes = Math.floor(time / 60);
-        let seconds = time % 60;
+        let minutes = Math.floor(time / 60); let seconds = time % 60;
         let timeStr = `\n[${minutes}:${seconds < 10 ? '0'+seconds : seconds}] `;
         
         let ta = document.getElementById('dictation-notebook');
-        let pos = ta.selectionStart;
-        let text = ta.value;
+        let pos = ta.selectionStart; let text = ta.value;
         ta.value = text.slice(0, pos) + timeStr + text.slice(pos);
-        ta.focus();
-        ta.selectionStart = ta.selectionEnd = pos + timeStr.length;
+        ta.focus(); ta.selectionStart = ta.selectionEnd = pos + timeStr.length;
     }
 
-    function toggleOriginalText() {
-        let el = document.getElementById('original-text');
-        el.classList.toggle('hidden');
-    }
-
-    // DİKTEYİ KAYDET
     function saveDictation() {
         let notes = document.getElementById('dictation-notebook').value.trim();
+        let original = document.getElementById('original-text').value.trim();
+        
         if (!notes) { alert("Defter boş! Önce bir şeyler yazmalısın."); return; }
         if (!currentVideoId) { alert("Video linki bulunamadı!"); return; }
 
-        myData.dictations.push({ videoId: currentVideoId, notes: notes, date: new Date().toLocaleDateString() });
+        myData.dictations.push({ 
+            videoId: currentVideoId, 
+            notes: notes, 
+            originalText: original, 
+            date: new Date().toLocaleDateString() 
+        });
         saveToLocal();
         
-        document.getElementById('dict-feedback').innerText = "✅ Dikte başarıyla arşive kaydedildi!";
+        document.getElementById('dict-feedback').innerText = "✅ Dikte ve Orijinal Metin arşive kaydedildi!";
         setTimeout(() => { document.getElementById('dict-feedback').innerText = ""; }, 3000);
     }
 
-    // Başlangıç Yüklemesi
+    // --- OYUN MOTORLARI ---
+    let currentQIndex = 0, shuffledQuestions = [], currentPuzzleAnswer = "", currentHintIndex = 0;
+
+    function startTestGame() {
+        currentQIndex = 0;
+        shuffledQuestions = [...myData.vocab].sort(() => 0.5 - Math.random());
+        if(shuffledQuestions.length < 2) { alert("Test için defterde en az 2 kelime olmalı!"); return; }
+        loadTestQuestion();
+    }
+
+    function loadTestQuestion() {
+        document.getElementById('test-next').classList.add('hidden');
+        document.getElementById('test-feedback').innerText = "";
+        const optionsArea = document.getElementById('test-options');
+        optionsArea.innerHTML = "";
+        if (currentQIndex >= shuffledQuestions.length) { document.getElementById('test-question').innerHTML = "🎉 Tebrikler! Tüm testi bitirdin."; return; }
+        let q = shuffledQuestions[currentQIndex];
+        document.getElementById('test-question').innerHTML = `<strong>Tanım:</strong> ${q.en}<br><span style="font-size:0.9rem; color:#555;">(🇹🇷 ${q.tr})</span>`;
+        let wrongOptions = myData.vocab.filter(v => v.word !== q.word).sort(() => 0.5 - Math.random()).slice(0, 3);
+        let allOptions = [q, ...wrongOptions].sort(() => 0.5 - Math.random());
+        allOptions.forEach(opt => {
+            let btn = document.createElement("button"); btn.className = "option-btn"; btn.innerText = opt.word;
+            btn.onclick = () => {
+                document.querySelectorAll('#test-options .option-btn').forEach(b => b.disabled = true);
+                if(opt.word === q.word) {
+                    btn.style.background = "#2ecc71"; btn.style.color = "white";
+                    document.getElementById('test-feedback').innerHTML = `✅ Doğru!<br><span style="font-size:1rem; font-weight:normal; color:#333;">🗣️ Okunuşu: ${q.pron}</span>`;
+                } else {
+                    btn.style.background = "#e74c3c"; btn.style.color = "white";
+                    document.getElementById('test-feedback').innerHTML = `❌ Yanlış! Doğrusu: <strong>${q.word}</strong><br><span style="font-size:1rem; font-weight:normal; color:#333;">🗣️ Okunuşu: ${q.pron}</span>`;
+                }
+                document.getElementById('test-next').classList.remove('hidden');
+            };
+            optionsArea.appendChild(btn);
+        });
+    }
+    function nextTestQuestion() { currentQIndex++; loadTestQuestion(); }
+
+    function startPuzzleGame() {
+        currentQIndex = 0;
+        shuffledQuestions = [...myData.vocab].sort(() => 0.5 - Math.random());
+        if(shuffledQuestions.length === 0) { alert("Bulmaca için kelime yok!"); return; }
+        loadPuzzleQuestion();
+    }
+
+    function loadPuzzleQuestion() {
+        document.getElementById('puzzle-next').classList.add('hidden');
+        document.getElementById('puzzle-feedback').innerText = "";
+        let inputField = document.getElementById('puzzle-input');
+        inputField.value = ""; inputField.disabled = false; inputField.style.border = "1px solid #ccc";
+        currentHintIndex = 0;
+        if (currentQIndex >= shuffledQuestions.length) {
+            document.getElementById('puzzle-question').innerHTML = "🎉 Tebrikler! Bulmacayı bitirdin.";
+            document.querySelector('.puzzle-input-area').style.display = 'none'; return;
+        }
+        let q = shuffledQuestions[currentQIndex];
+        currentPuzzleAnswer = q.word;
+        document.getElementById('puzzle-question').innerHTML = `<strong>Tanım:</strong> ${q.en}<br><span style="font-size:0.9rem; color:#666;">(İpucu: 🇹🇷 ${q.tr} | ${q.word.length} karakter)</span>`;
+        inputField.focus();
+    }
+
+    function checkPuzzleAnswer() {
+        let userInput = document.getElementById('puzzle-input').value.trim().toLowerCase();
+        let q = shuffledQuestions[currentQIndex];
+        let correctAnswer = currentPuzzleAnswer.toLowerCase();
+        let feedback = document.getElementById('puzzle-feedback');
+        if (userInput === correctAnswer) {
+            feedback.innerHTML = `<span style="color:#27ae60;">✅ Harika! Doğru: <strong>${currentPuzzleAnswer}</strong></span><br><span style="font-size:1rem; font-weight:normal; color:#333;">🗣️ Okunuşu: ${q.pron}</span>`;
+            document.getElementById('puzzle-input').style.border = "3px solid #27ae60"; document.getElementById('puzzle-input').disabled = true;
+            document.getElementById('puzzle-next').classList.remove('hidden');
+        } else {
+            feedback.innerHTML = `<span style="color:#e74c3c;">❌ Tekrar dene veya ipucu iste!</span>`;
+            document.getElementById('puzzle-input').style.border = "3px solid #e74c3c";
+        }
+    }
+
+    function givePuzzleHint() {
+        let inputField = document.getElementById('puzzle-input');
+        if(currentHintIndex < currentPuzzleAnswer.length) {
+            inputField.value = currentPuzzleAnswer.substring(0, currentHintIndex + 1);
+            currentHintIndex++;
+        }
+    }
+    function nextPuzzleQuestion() { currentQIndex++; loadPuzzleQuestion(); }
+
     window.onload = renderSummary;
+    document.getElementById('puzzle-input').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkPuzzleAnswer(); });
 </script>
+
 </body>
 </html>

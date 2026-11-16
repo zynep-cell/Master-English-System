@@ -8,24 +8,33 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; color: #333; margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         h1 { text-align: center; color: #2c3e50; }
-        .nav-buttons { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
-        button { padding: 10px 20px; border: none; border-radius: 8px; background: #3498db; color: white; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        .nav-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        button { padding: 10px 20px; border: none; border-radius: 8px; background: #3498db; color: white; font-size: 15px; cursor: pointer; transition: 0.3s; font-weight: bold; }
         button:hover { background: #2980b9; }
+        .btn-green { background: #2ecc71; } .btn-green:hover { background: #27ae60; }
+        .btn-orange { background: #f39c12; } .btn-orange:hover { background: #d68910; }
         
         /* Özet Kutuları */
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .box { background: #fafafa; padding: 20px; border-radius: 10px; border: 1px solid #eee; }
-        .box h2 { border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 1.2rem; color: #2c3e50; }
+        .box h2 { border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 1.2rem; color: #2c3e50; margin-top: 0;}
         .tag { background: #e8f4f8; color: #2980b9; padding: 3px 8px; border-radius: 15px; font-size: 0.85rem; font-weight: bold; }
         
-        /* Oyun Alanı */
-        #game-section { text-align: center; display: none; }
+        /* Form & Oyun Alanı */
+        .section-panel { display: none; text-align: center; }
+        .active-section { display: block; }
+        .form-group { display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: auto; text-align: left; }
+        input, select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+        
         .question-box { background: #fff3cd; padding: 20px; border-radius: 10px; font-size: 1.2rem; margin-bottom: 20px; border: 1px solid #ffeeba; }
         .options { display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: auto; }
         .option-btn { background: #ecf0f1; color: #333; border: 2px solid #bdc3c7; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        .option-btn:hover { background: #d5dbdb; }
-        #feedback { margin-top: 20px; font-weight: bold; font-size: 1.2rem; min-height: 30px; }
         
+        /* Bulmaca Input */
+        .puzzle-input-area { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        #puzzle-input { font-size: 1.5rem; text-align: center; text-transform: lowercase; width: 250px; font-weight: bold; }
+        
+        #feedback { margin-top: 20px; font-weight: bold; font-size: 1.2rem; min-height: 30px; }
         .hidden { display: none !important; }
         @media (max-width: 768px) { .grid-container { grid-template-columns: 1fr; } }
     </style>
@@ -33,166 +42,250 @@
 <body>
 
 <div class="container">
-    <h1>🚀 Pratik Koçum & Mini Oyun</h1>
+    <h1>🚀 Pratik Koçum & Oyun</h1>
     
     <div class="nav-buttons">
-        <button onclick="showSection('summary')">📝 Günün Özeti (Defter)</button>
-        <button onclick="showSection('game')">🎮 Oyunu Başlat (Test)</button>
+        <button onclick="showSection('summary')">📝 Defterim</button>
+        <button class="btn-green" onclick="showSection('add-word')">➕ Kelime Ekle</button>
+        <button onclick="showSection('game-test')">🎮 Çoktan Seçmeli</button>
+        <button class="btn-orange" onclick="showSection('game-puzzle')">🧩 Yazmalı Bulmaca</button>
     </div>
 
-    <!-- ÖZET BÖLÜMÜ (DEFTER) -->
-    <div id="summary-section">
+    <!-- BÖLÜM 1: DEFTERİM -->
+    <div id="summary" class="section-panel active-section" style="text-align: left;">
         <div class="grid-container">
             <div class="box">
-                <h2>📦 Kutu 1: Yeni Kelimeler</h2>
+                <h2>📦 Kutu 1: Kelimeler & Kalıplar</h2>
                 <div id="words-list"></div>
-            </div>
-            <div class="box">
-                <h2>💬 Kutu 2: Günlük Kalıplar</h2>
-                <div id="phrases-list"></div>
             </div>
             <div class="box">
                 <h2>🔄 Kutu 3: Otonna Dönüşümü</h2>
                 <p><strong>Before:</strong> Companies use social media to get more customers.</p>
                 <p><strong>After:</strong> To expand their customer base, companies utilize digital platforms since the rise of digitalization.</p>
             </div>
-            <div class="box">
+            <div class="box" style="grid-column: 1 / -1;">
                 <h2>🧩 Kutu 4: Cümle Dizilim Formülü</h2>
                 <p><em>Özne + Yardımcı Fiil + Fiil + Nesne + Yer + Zaman</em></p>
-                <p><strong>(+)</strong> I am studying English at home today.<br>
-                <strong>(-)</strong> I am not studying English at home today.<br>
-                <strong>(?)</strong> Are you studying English at home today?</p>
+                <p><strong>(+)</strong> I am studying English at home today. | <strong>(-)</strong> I am not studying English at home today. | <strong>(?)</strong> Are you studying English at home today?</p>
             </div>
         </div>
     </div>
 
-    <!-- OYUN BÖLÜMÜ -->
-    <div id="game-section">
-        <h2 id="round-title">Tur 1: Tanımdan Kelimeyi Bul</h2>
-        <div class="question-box" id="question-text">Soru buraya gelecek...</div>
-        <div class="options" id="options-area"></div>
-        <div id="feedback"></div>
-        <button id="next-btn" class="hidden" onclick="nextQuestion()" style="margin-top: 20px;">Sonraki Soru ➡️</button>
+    <!-- BÖLÜM 2: YENİ KELİME EKLE -->
+    <div id="add-word" class="section-panel">
+        <h2>Deftere Yeni Kelime/Kalıp Ekle</h2>
+        <div class="form-group">
+            <input type="text" id="new-word" placeholder="Kelime veya Kalıp (Örn: Utilize)">
+            <select id="new-type">
+                <option value="Verb / Fiil">Verb / Fiil</option>
+                <option value="Noun / İsim">Noun / İsim</option>
+                <option value="Adjective / Sıfat">Adjective / Sıfat</option>
+                <option value="Phrase / Kalıp">Phrase / Kalıp</option>
+            </select>
+            <input type="text" id="new-pron" placeholder="Okunuşu (Örn: yutilayz)">
+            <input type="text" id="new-tr" placeholder="Türkçe Anlamı (Örn: Faydalanmak)">
+            <input type="text" id="new-en" placeholder="İngilizce Tanımı (Örn: To use effectively)">
+            <button class="btn-green" onclick="addNewWord()">Kaydet ve Deftere Ekle</button>
+            <p id="add-feedback" style="color: #27ae60; font-weight: bold;"></p>
+        </div>
+    </div>
+
+    <!-- BÖLÜM 3: ÇOKTAN SEÇMELİ OYUN -->
+    <div id="game-test" class="section-panel">
+        <h2>Çoktan Seçmeli Test</h2>
+        <div class="question-box" id="test-question">Soru buraya gelecek...</div>
+        <div class="options" id="test-options"></div>
+        <div id="test-feedback" class="feedback-area"></div>
+        <button id="test-next" class="hidden" onclick="nextTestQuestion()" style="margin-top: 20px;">Sonraki Soru ➡️</button>
+    </div>
+
+    <!-- BÖLÜM 4: YAZMALI BULMACA (YENİ) -->
+    <div id="game-puzzle" class="section-panel">
+        <h2>🧩 Çengel Bulmaca (Tanımı Oku, Kelimeyi Yaz)</h2>
+        <div class="question-box" id="puzzle-question">Tanım buraya gelecek...</div>
+        
+        <div class="puzzle-input-area">
+            <input type="text" id="puzzle-input" placeholder="kelimeyi yazın..." autocomplete="off">
+            <button class="btn-green" onclick="checkPuzzleAnswer()">Kontrol Et</button>
+            <button class="btn-orange" onclick="givePuzzleHint()">İpucu</button>
+        </div>
+        
+        <div id="puzzle-feedback" class="feedback-area"></div>
+        <button id="puzzle-next" class="hidden" onclick="nextPuzzleQuestion()" style="margin-top: 20px;">Sonraki Bulmaca ➡️</button>
     </div>
 </div>
 
 <script>
-    // --- VERİTABANI (DEFTERİMİZ) ---
-    // Oyunda sorulacak ve özet kutusunda gösterilecek kelime/kalıp listemiz.
-    const vocabulary = [
-        { word: "Utilize", type: "Verb / Fiil", pron: "yutilayz", tr: "Faydalanmak, etkili kullanmak", en: "To use something in an effective way." },
-        { word: "Expand", type: "Verb / Fiil", pron: "ikspend", tr: "Genişletmek, büyütmek", en: "To make something larger in size or amount." },
-        { word: "Attract", type: "Verb / Fiil", pron: "etrekt", tr: "Cezbetmek, çekmek", en: "To cause someone to choose or be interested in something." },
-        { word: "It depends on...", type: "Phrase / Kalıp", pron: "it dipendz on", tr: "...e / ...a bağlı", en: "Used to say that something is affected by something else." }
+    // --- VERİTABANI (LocalStorage Destekli) ---
+    const defaultVocab = [
+        { word: "Utilize", type: "Verb / Fiil", pron: "yutilayz", tr: "Faydalanmak", en: "To use something in an effective way." },
+        { word: "It depends on", type: "Phrase / Kalıp", pron: "it dipendz on", tr: "...e bağlı", en: "Used to say that something is affected by something else." }
     ];
 
-    // Özet kutularını veritabanından doldur
-    window.onload = () => {
-        let wordsHtml = "", phrasesHtml = "";
-        vocabulary.forEach(v => {
-            let item = `<p><strong>${v.word}</strong> <span class="tag">${v.type}</span><br>
-                        <em>Okunuşu:</em> ${v.pron}<br>
-                        <em>Anlamı:</em> ${v.tr}<br>
-                        <em>Tanım:</em> ${v.en}</p>`;
-            if(v.type.includes("Phrase")) phrasesHtml += item;
-            else wordsHtml += item;
-        });
-        document.getElementById("words-list").innerHTML = wordsHtml;
-        document.getElementById("phrases-list").innerHTML = phrasesHtml;
-    };
+    let vocabulary = JSON.parse(localStorage.getItem('myVocab'));
+    if (!vocabulary || vocabulary.length === 0) {
+        vocabulary = [...defaultVocab];
+        saveVocab();
+    }
+
+    function saveVocab() { localStorage.setItem('myVocab', JSON.stringify(vocabulary)); }
 
     // --- SEKME GEÇİŞLERİ ---
-    function showSection(section) {
-        document.getElementById('summary-section').style.display = section === 'summary' ? 'block' : 'none';
-        document.getElementById('game-section').style.display = section === 'game' ? 'block' : 'none';
-        if(section === 'game') startGame();
-    }
-
-    // --- OYUN MOTORU ---
-    let currentRound = 1; 
-    let currentQuestionIndex = 0;
-    let gameQuestions = [];
-
-    function startGame() {
-        currentRound = 1;
-        currentQuestionIndex = 0;
-        document.getElementById('feedback').innerText = "";
+    function showSection(sectionId) {
+        document.querySelectorAll('.section-panel').forEach(panel => panel.classList.remove('active-section'));
+        document.getElementById(sectionId).classList.add('active-section');
         
-        // Soruları karıştır (Şimdilik örnek olarak listeyi aynen alıyoruz)
-        gameQuestions = [...vocabulary].sort(() => 0.5 - Math.random());
-        loadQuestion();
+        if(sectionId === 'summary') renderSummary();
+        if(sectionId === 'game-test') startTestGame();
+        if(sectionId === 'game-puzzle') startPuzzleGame();
     }
 
-    function loadQuestion() {
-        document.getElementById('next-btn').classList.add('hidden');
-        document.getElementById('feedback').innerText = "";
-        const optionsArea = document.getElementById('options-area');
+    // --- ÖZET (DEFTER) RENDER ---
+    function renderSummary() {
+        let html = "";
+        vocabulary.forEach(v => {
+            html += `<p style="margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                        <strong>${v.word}</strong> <span class="tag">${v.type}</span><br>
+                        <span style="font-size: 0.9rem;">🗣️ ${v.pron} | 🇹🇷 ${v.tr}<br>📖 ${v.en}</span>
+                     </p>`;
+        });
+        document.getElementById("words-list").innerHTML = html;
+    }
+
+    // --- YENİ KELİME EKLEME ---
+    function addNewWord() {
+        let w = document.getElementById('new-word').value.trim();
+        let t = document.getElementById('new-type').value;
+        let p = document.getElementById('new-pron').value.trim();
+        let tr = document.getElementById('new-tr').value.trim();
+        let en = document.getElementById('new-en').value.trim();
+
+        if(!w || !en) { alert("Kelime ve İngilizce tanım kısımları boş bırakılamaz!"); return; }
+
+        vocabulary.push({ word: w, type: t, pron: p, tr: tr, en: en });
+        saveVocab();
+        
+        document.getElementById('add-feedback').innerText = "✅ Deftere başarıyla eklendi!";
+        setTimeout(() => { document.getElementById('add-feedback').innerText = ""; }, 2000);
+        
+        document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+    }
+
+    // --- OYUN ORTAK DEĞİŞKENLERİ ---
+    let currentQIndex = 0;
+    let shuffledQuestions = [];
+
+    // --- ÇOKTAN SEÇMELİ TEST MOTURU ---
+    function startTestGame() {
+        currentQIndex = 0;
+        shuffledQuestions = [...vocabulary].sort(() => 0.5 - Math.random());
+        loadTestQuestion();
+    }
+
+    function loadTestQuestion() {
+        document.getElementById('test-next').classList.add('hidden');
+        document.getElementById('test-feedback').innerText = "";
+        const optionsArea = document.getElementById('test-options');
         optionsArea.innerHTML = "";
         
-        if (currentQuestionIndex >= gameQuestions.length) {
-            // Tur 1 bittiyse Tur 2'ye geç
-            if (currentRound === 1) {
-                currentRound = 2;
-                currentQuestionIndex = 0;
-                gameQuestions = [...vocabulary].sort(() => 0.5 - Math.random());
-                alert("Harika! Tur 1 bitti. Şimdi Tur 2: Kelimeden Tanımı Bulma zamanı!");
-            } else {
-                document.getElementById('question-text').innerHTML = "🎉 Tebrikler! Tüm oyunu tamamladın.";
-                return;
-            }
+        if (currentQIndex >= shuffledQuestions.length) {
+            document.getElementById('test-question').innerHTML = "🎉 Tebrikler! Tüm kelimeleri bitirdin.";
+            return;
         }
 
-        let q = gameQuestions[currentQuestionIndex];
-        document.getElementById('round-title').innerText = currentRound === 1 ? "Tur 1: Tanımı Oku, Kelimeyi Seç" : "Tur 2: Kelimeyi Oku, Tanımı Seç";
+        let q = shuffledQuestions[currentQIndex];
+        document.getElementById('test-question').innerHTML = `<strong>İngilizce Tanım:</strong> ${q.en}`;
         
-        // Yanlış şıkları oluştur
-        let wrongOptions = vocabulary.filter(v => v.word !== q.word).sort(() => 0.5 - Math.random()).slice(0, 2);
+        let wrongOptions = vocabulary.filter(v => v.word !== q.word).sort(() => 0.5 - Math.random()).slice(0, 3);
         let allOptions = [q, ...wrongOptions].sort(() => 0.5 - Math.random());
 
-        if (currentRound === 1) {
-            document.getElementById('question-text').innerHTML = `<strong>İngilizce Tanım:</strong> ${q.en}<br><span style="font-size:0.9rem; color:#666;">(Anlamı: ${q.tr})</span>`;
-            allOptions.forEach(opt => {
-                let btn = document.createElement("button");
-                btn.className = "option-btn";
-                btn.innerText = opt.word;
-                btn.onclick = () => checkAnswer(opt.word === q.word, btn);
-                optionsArea.appendChild(btn);
-            });
+        allOptions.forEach(opt => {
+            let btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerText = opt.word;
+            btn.onclick = () => {
+                document.querySelectorAll('#test-options .option-btn').forEach(b => b.disabled = true);
+                if(opt.word === q.word) {
+                    btn.style.background = "#2ecc71"; btn.style.color = "white";
+                    document.getElementById('test-feedback').innerText = "✅ Doğru!";
+                } else {
+                    btn.style.background = "#e74c3c"; btn.style.color = "white";
+                    document.getElementById('test-feedback').innerText = `❌ Yanlış! Doğrusu: ${q.word}`;
+                }
+                document.getElementById('test-next').classList.remove('hidden');
+            };
+            optionsArea.appendChild(btn);
+        });
+    }
+    function nextTestQuestion() { currentQIndex++; loadTestQuestion(); }
+
+    // --- BULMACA (ÇENGEL) MOTORU ---
+    let currentPuzzleAnswer = "";
+    let currentHintIndex = 0;
+
+    function startPuzzleGame() {
+        currentQIndex = 0;
+        shuffledQuestions = [...vocabulary].sort(() => 0.5 - Math.random());
+        loadPuzzleQuestion();
+    }
+
+    function loadPuzzleQuestion() {
+        document.getElementById('puzzle-next').classList.add('hidden');
+        document.getElementById('puzzle-feedback').innerText = "";
+        let inputField = document.getElementById('puzzle-input');
+        inputField.value = "";
+        inputField.disabled = false;
+        inputField.style.border = "1px solid #ccc";
+        currentHintIndex = 0;
+        
+        if (currentQIndex >= shuffledQuestions.length) {
+            document.getElementById('puzzle-question').innerHTML = "🎉 Tebrikler! Bulmacayı bitirdin.";
+            document.querySelector('.puzzle-input-area').style.display = 'none';
+            return;
+        }
+
+        let q = shuffledQuestions[currentQIndex];
+        currentPuzzleAnswer = q.word;
+        document.getElementById('puzzle-question').innerHTML = `<strong>Tanım:</strong> ${q.en}<br><span style="font-size:0.9rem; color:#666;">(İpucu: ${q.tr} | ${q.word.length} harf/karakter)</span>`;
+        inputField.focus();
+    }
+
+    function checkPuzzleAnswer() {
+        let userInput = document.getElementById('puzzle-input').value.trim().toLowerCase();
+        let correctAnswer = currentPuzzleAnswer.toLowerCase();
+        let feedback = document.getElementById('puzzle-feedback');
+
+        if (userInput === correctAnswer) {
+            feedback.innerHTML = `<span style="color:#27ae60;">✅ Harika! Doğru bildin: <strong>${currentPuzzleAnswer}</strong></span>`;
+            document.getElementById('puzzle-input').style.border = "3px solid #27ae60";
+            document.getElementById('puzzle-input').disabled = true;
+            document.getElementById('puzzle-next').classList.remove('hidden');
         } else {
-            document.getElementById('question-text').innerHTML = `<strong>Kelime:</strong> ${q.word}`;
-            allOptions.forEach(opt => {
-                let btn = document.createElement("button");
-                btn.className = "option-btn";
-                btn.innerText = opt.en;
-                btn.onclick = () => checkAnswer(opt.word === q.word, btn);
-                optionsArea.appendChild(btn);
-            });
+            feedback.innerHTML = `<span style="color:#e74c3c;">❌ Tekrar dene veya ipucu iste!</span>`;
+            document.getElementById('puzzle-input').style.border = "3px solid #e74c3c";
         }
     }
 
-    function checkAnswer(isCorrect, btn) {
-        let options = document.querySelectorAll('.option-btn');
-        options.forEach(o => o.disabled = true); // Seçim yapıldıktan sonra butonları kilitle
-
-        const feedback = document.getElementById('feedback');
-        if (isCorrect) {
-            btn.style.background = "#2ecc71"; // Yeşil
-            btn.style.color = "white";
-            feedback.innerText = "✅ Doğru!";
-            feedback.style.color = "#27ae60";
-        } else {
-            btn.style.background = "#e74c3c"; // Kırmızı
-            btn.style.color = "white";
-            feedback.innerText = "❌ Yanlış! Bir dahakine...";
-            feedback.style.color = "#c0392b";
+    function givePuzzleHint() {
+        let inputField = document.getElementById('puzzle-input');
+        let currentVal = inputField.value;
+        // Eğer ipucu karakteri hedef kelimeden kısaysa bir harf ekle
+        if(currentHintIndex < currentPuzzleAnswer.length) {
+            inputField.value = currentPuzzleAnswer.substring(0, currentHintIndex + 1);
+            currentHintIndex++;
         }
-        document.getElementById('next-btn').classList.remove('hidden');
     }
 
-    function nextQuestion() {
-        currentQuestionIndex++;
-        loadQuestion();
-    }
+    function nextPuzzleQuestion() { currentQIndex++; loadPuzzleQuestion(); }
+
+    // Başlangıçta özet sayfasını yükle
+    window.onload = renderSummary;
+    
+    // Bulmacada Enter tuşuna basınca kontrol et
+    document.getElementById('puzzle-input').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') checkPuzzleAnswer();
+    });
+
 </script>
 
 </body>
